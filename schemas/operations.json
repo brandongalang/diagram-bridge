@@ -1,0 +1,605 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "maxItems": 5000,
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "addNode"
+          },
+          "node": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "step",
+                  "decision",
+                  "datastore",
+                  "text",
+                  "group"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "layout": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": -100000,
+                    "maximum": 100000
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": -100000,
+                    "maximum": 100000
+                  },
+                  "width": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100000
+                  },
+                  "height": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100000
+                  }
+                },
+                "additionalProperties": false
+              },
+              "parentId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+              },
+              "ref": {
+                "type": "string",
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "node"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "updateNode"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "patch": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "step",
+                  "decision",
+                  "datastore",
+                  "text",
+                  "group"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "ref": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "layout": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": -100000,
+                    "maximum": 100000
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": -100000,
+                    "maximum": 100000
+                  },
+                  "width": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100000
+                  },
+                  "height": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100000
+                  }
+                },
+                "additionalProperties": false
+              },
+              "parentId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "patch"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "removeNode"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "cascade": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "addEdge"
+          },
+          "edge": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+              },
+              "target": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "target"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "edge"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "updateEdge"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "patch": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+              },
+              "target": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "patch"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "removeEdge"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "addNote"
+          },
+          "note": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+              },
+              "body": {
+                "type": "string",
+                "maxLength": 20000
+              },
+              "author": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "anchor": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "diagram"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "node"
+                          },
+                          {
+                            "type": "string",
+                            "const": "edge"
+                          }
+                        ]
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "detached"
+                      },
+                      "previousType": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "node"
+                          },
+                          {
+                            "type": "string",
+                            "const": "edge"
+                          }
+                        ]
+                      },
+                      "previousId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+                      },
+                      "previousLabel": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "previousType",
+                      "previousId",
+                      "previousLabel"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "body",
+              "author",
+              "anchor"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "note"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "updateNote"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "patch": {
+            "type": "object",
+            "properties": {
+              "body": {
+                "type": "string",
+                "maxLength": 20000
+              },
+              "author": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "anchor": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "diagram"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "node"
+                          },
+                          {
+                            "type": "string",
+                            "const": "edge"
+                          }
+                        ]
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "detached"
+                      },
+                      "previousType": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "node"
+                          },
+                          {
+                            "type": "string",
+                            "const": "edge"
+                          }
+                        ]
+                      },
+                      "previousId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+                      },
+                      "previousLabel": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "previousType",
+                      "previousId",
+                      "previousLabel"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "patch"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "removeNote"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "setTitle"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      }
+    ]
+  },
+  "title": "Operations",
+  "description": "Schema for Diagram Bridge operation batches"
+}

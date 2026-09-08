@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.DS_Store
+.env
+.env.*
+!.env.example
+.diagram-bridge/
+.build/
+.workflow/
+.impeccable/
+workspace/
+my-plans/
+*.tgz

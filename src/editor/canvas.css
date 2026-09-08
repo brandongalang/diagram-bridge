@@ -1,0 +1,91 @@
+/* Scoped Canvas & Drafting Node Styles */
+
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  outline: none;
+}
+
+.canvas-container .react-flow__pane {
+  cursor: grab;
+}
+
+.canvas-container .react-flow__pane:active {
+  cursor: grabbing;
+}
+
+/* Handles */
+.custom-handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: #64748b !important;
+  border: 1.5px solid #ffffff !important;
+  border-radius: 50% !important;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+  z-index: 10;
+}
+
+.custom-handle:hover {
+  background: #0f766e !important;
+  box-shadow: 0 0 0 2px #ccfbf1;
+}
+
+/* Export Mode Overrides: handles must be mounted for React Flow geometry, but invisible */
+.export-canvas .custom-handle,
+.export-canvas .react-flow__handle {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.export-canvas .react-flow__controls {
+  display: none !important;
+}
+
+/* Node common styling */
+.drafting-node {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  user-select: none;
+  font-family: 'Manrope Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.drafting-node-label {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+/* Note Badges with accessible metadata */
+.drafting-note-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: 1px solid #fde68a;
+  cursor: default;
+  white-space: nowrap;
+}
+
+/* Edge interactions */
+.react-flow__edge-interaction {
+  cursor: pointer;
+}
+
+.custom-handle { opacity: 0; }
+.drafting-node:hover .custom-handle,
+.drafting-node:focus-within .custom-handle { opacity: 1; }
+.routing-warning { position: absolute; bottom: 16px; left: 64px; right: 16px; z-index: 20; padding: 10px 14px; background: #fffbeb; color: #92400e; border: 1px solid #d97706; border-radius: 6px; font-size: 13px; }
+.edge-label { position: absolute; box-sizing: border-box; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; color: #334155; font: 600 12px/16px 'Manrope Variable', sans-serif; text-align: center; pointer-events: all; cursor: pointer; }
+.edge-label:focus-visible { outline: 2px solid #0f766e; outline-offset: 2px; }
+
+.canvas-container .react-flow__node-group { padding: 0; border: 0; background: transparent; border-radius: 0; }

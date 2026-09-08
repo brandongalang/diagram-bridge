@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "documentId": "doc-classification-1",
+  "revision": 1,
+  "title": "AI Classification Pipeline",
+  "nodes": [
+    {
+      "id": "group-pipeline",
+      "kind": "group",
+      "label": "Classification & Review Subsystem",
+      "layout": {
+        "x": 50,
+        "y": 50,
+        "width": 700,
+        "height": 500
+      }
+    },
+    {
+      "id": "node-checkpoint",
+      "kind": "step",
+      "label": "Human Review Checkpoint",
+      "layout": {
+        "x": 800,
+        "y": 270,
+        "width": 220,
+        "height": 88
+      }
+    },
+    {
+      "id": "node-db",
+      "kind": "datastore",
+      "label": "Classification DB State",
+      "layout": {
+        "x": 800,
+        "y": 100,
+        "width": 220,
+        "height": 88
+      }
+    },
+    {
+      "id": "node-decision",
+      "kind": "decision",
+      "label": "Confidence Score >= 0.85?",
+      "layout": {
+        "x": 380,
+        "y": 260,
+        "width": 220,
+        "height": 110
+      },
+      "parentId": "group-pipeline"
+    },
+    {
+      "id": "node-inference",
+      "kind": "step",
+      "label": "LLM Classification Inference",
+      "layout": {
+        "x": 380,
+        "y": 100,
+        "width": 220,
+        "height": 88
+      },
+      "parentId": "group-pipeline"
+    },
+    {
+      "id": "node-ingest",
+      "kind": "step",
+      "label": "Batch Ingestion",
+      "layout": {
+        "x": 80,
+        "y": 100,
+        "width": 220,
+        "height": 88
+      },
+      "parentId": "group-pipeline"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "source": "node-ingest",
+      "target": "node-db",
+      "label": "Record Pending Status"
+    },
+    {
+      "id": "edge-2",
+      "source": "node-ingest",
+      "target": "node-inference",
+      "label": "Dispatch Payload"
+    },
+    {
+      "id": "edge-3",
+      "source": "node-inference",
+      "target": "node-decision",
+      "label": "Inference Output"
+    },
+    {
+      "id": "edge-4",
+      "source": "node-decision",
+      "target": "node-db",
+      "label": "Auto-commit High Confidence"
+    },
+    {
+      "id": "edge-5",
+      "source": "node-decision",
+      "target": "node-checkpoint",
+      "label": "Route Low Confidence"
+    },
+    {
+      "id": "edge-retry",
+      "source": "node-checkpoint",
+      "target": "node-inference",
+      "label": "Retry on Human Guidance"
+    }
+  ],
+  "notes": [
+    {
+      "id": "note-doc-1",
+      "body": "Exploratory plan for triage queue.",
+      "author": "architect",
+      "anchor": {
+        "type": "diagram"
+      }
+    },
+    {
+      "id": "note-edge-1",
+      "body": "Fallback routing threshold.",
+      "author": "architect",
+      "anchor": {
+        "type": "edge",
+        "id": "edge-5"
+      }
+    },
+    {
+      "id": "note-node-1",
+      "body": "Agent prompt: verify checkpoint timeout behavior.",
+      "author": "qa-agent",
+      "anchor": {
+        "type": "node",
+        "id": "node-checkpoint"
+      }
+    }
+  ]
+}

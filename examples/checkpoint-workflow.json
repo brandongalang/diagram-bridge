@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "documentId": "classification-checkpoints",
+  "revision": 1,
+  "title": "Classification workflow",
+  "nodes": [
+    {
+      "id": "workflow",
+      "kind": "group",
+      "label": "Vercel Workflow",
+      "layout": {
+        "x": 40,
+        "y": 40,
+        "width": 900,
+        "height": 470
+      }
+    },
+    {
+      "id": "receive",
+      "kind": "step",
+      "label": "Receive record",
+      "parentId": "workflow",
+      "layout": {
+        "x": 45,
+        "y": 90,
+        "width": 220,
+        "height": 88
+      }
+    },
+    {
+      "id": "context",
+      "kind": "step",
+      "label": "Load context",
+      "parentId": "workflow",
+      "layout": {
+        "x": 335,
+        "y": 90,
+        "width": 220,
+        "height": 88
+      }
+    },
+    {
+      "id": "infer",
+      "kind": "step",
+      "label": "Classify with model",
+      "parentId": "workflow",
+      "layout": {
+        "x": 625,
+        "y": 90,
+        "width": 220,
+        "height": 88
+      }
+    },
+    {
+      "id": "checkpoint",
+      "kind": "step",
+      "label": "Save result + checkpoint",
+      "parentId": "workflow",
+      "layout": {
+        "x": 625,
+        "y": 295,
+        "width": 220,
+        "height": 88
+      }
+    },
+    {
+      "id": "decision",
+      "kind": "decision",
+      "label": "Needs review?",
+      "parentId": "workflow",
+      "layout": {
+        "x": 335,
+        "y": 285,
+        "width": 220,
+        "height": 110
+      }
+    },
+    {
+      "id": "complete",
+      "kind": "step",
+      "label": "Complete classification",
+      "parentId": "workflow",
+      "layout": {
+        "x": 45,
+        "y": 295,
+        "width": 220,
+        "height": 88
+      }
+    },
+    {
+      "id": "database",
+      "kind": "datastore",
+      "label": "Classification database",
+      "layout": {
+        "x": 1030,
+        "y": 335,
+        "width": 240,
+        "height": 100
+      }
+    },
+    {
+      "id": "review",
+      "kind": "step",
+      "label": "Human review",
+      "layout": {
+        "x": 375,
+        "y": 615,
+        "width": 220,
+        "height": 88
+      }
+    },
+    {
+      "id": "caption",
+      "kind": "text",
+      "label": "Illustrative plan · checkpoint and retry behavior to be agreed",
+      "layout": {
+        "x": 50,
+        "y": 615,
+        "width": 260,
+        "height": 88
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "receive-context",
+      "source": "receive",
+      "target": "context",
+      "label": "Record ID"
+    },
+    {
+      "id": "context-infer",
+      "source": "context",
+      "target": "infer",
+      "label": "Enriched input"
+    },
+    {
+      "id": "inference-checkpoint",
+      "source": "infer",
+      "target": "checkpoint",
+      "label": "Inference result"
+    },
+    {
+      "id": "checkpoint-db",
+      "source": "checkpoint",
+      "target": "database",
+      "label": "Persist"
+    },
+    {
+      "id": "checkpoint-decision",
+      "source": "checkpoint",
+      "target": "decision",
+      "label": "Saved result"
+    },
+    {
+      "id": "decision-complete",
+      "source": "decision",
+      "target": "complete",
+      "label": "No"
+    },
+    {
+      "id": "decision-review",
+      "source": "decision",
+      "target": "review",
+      "label": "Yes"
+    },
+    {
+      "id": "retry-inference",
+      "source": "infer",
+      "target": "infer",
+      "label": "Transient failure → retry"
+    }
+  ],
+  "notes": [
+    {
+      "id": "planning-context",
+      "body": "A starting point for aligning on classification, persistence, and checkpointing. This is an exploratory diagram, not an executable workflow.",
+      "author": "agent",
+      "anchor": {
+        "type": "diagram"
+      }
+    },
+    {
+      "id": "checkpoint-question",
+      "body": "Should we persist the inference result before advancing? Decide which saved state makes retrying safe.",
+      "author": "agent",
+      "anchor": {
+        "type": "node",
+        "id": "checkpoint"
+      }
+    },
+    {
+      "id": "retry-question",
+      "body": "Define the retry limit and the path after retries are exhausted. Keep retry behavior explicit in the plan.",
+      "author": "agent",
+      "anchor": {
+        "type": "edge",
+        "id": "retry-inference"
+      }
+    }
+  ]
+}

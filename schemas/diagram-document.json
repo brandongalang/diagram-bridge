@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "documentId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+    },
+    "revision": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "nodes": {
+      "maxItems": 1000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "step",
+              "decision",
+              "datastore",
+              "text",
+              "group"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "layout": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "y": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "width": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100000
+              },
+              "height": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100000
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "width",
+              "height"
+            ],
+            "additionalProperties": false
+          },
+          "parentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "ref": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "layout"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "edges": {
+      "maxItems": 2000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "target"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notes": {
+      "maxItems": 1000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "author": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "anchor": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "diagram"
+                  }
+                },
+                "required": [
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "const": "node"
+                      },
+                      {
+                        "type": "string",
+                        "const": "edge"
+                      }
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+                  }
+                },
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "detached"
+                  },
+                  "previousType": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "const": "node"
+                      },
+                      {
+                        "type": "string",
+                        "const": "edge"
+                      }
+                    ]
+                  },
+                  "previousId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+                  },
+                  "previousLabel": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "type",
+                  "previousType",
+                  "previousId",
+                  "previousLabel"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "body",
+          "author",
+          "anchor"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "properties": {
+        "documentId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9._-]{1,100}$"
+        },
+        "revision": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "documentId",
+        "revision"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "documentId",
+    "revision",
+    "title",
+    "nodes",
+    "edges",
+    "notes"
+  ],
+  "additionalProperties": false,
+  "title": "DiagramDocument",
+  "description": "Schema for Diagram Bridge documents"
+}
