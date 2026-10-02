@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ClipboardCopy, X } from 'lucide-react';
 import { buildHandoff, type HandoffContext } from '../handoff.js';
+import { usePanelFocus } from '../hooks/usePanelFocus.js';
 import type { DiagramDocument } from '../types.js';
 
 interface Props {
@@ -18,20 +19,38 @@ export function HandoffPanel({ document, context, hasUnsavedEdits, onClose }: Pr
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState('');
   const text = useMemo(() => buildHandoff(document, context, previous), [document, context, previous]);
+  const { panelRef, closeButtonRef } = usePanelFocus(onClose);
+  const instructionsRef = useRef<HTMLTextAreaElement>(null);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
   const copy = async () => {
+    const instructions = text;
+    const revision = document.revision;
+    const storageKey = key;
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(instructions);
+      if (!mountedRef.current) return;
       setCopied(true);
       setCopyError('');
-      try { localStorage.setItem(key, String(document.revision)); } catch { /* Copy works without a remembered baseline. */ }
+      try { localStorage.setItem(storageKey, String(revision)); } catch { /* Copy works without a remembered baseline. */ }
     } catch {
+      if (!mountedRef.current) return;
+      setCopied(false);
       setCopyError('Select the instructions below and copy them manually.');
+      const field = instructionsRef.current;
+      if (field && panelRef.current?.contains(field.ownerDocument.activeElement)) {
+        field.focus();
+        field.select();
+      }
     }
   };
-  return <aside className="handoff-panel" aria-label="Agent handoff">
+  return <aside ref={panelRef} className="handoff-panel" aria-label="Agent handoff">
     <div className="inspector-header">
       <strong>Hand off to your agent</strong>
-      <button type="button" className="tool-rail-btn" aria-label="Close agent handoff" onClick={onClose}><X size={17} /></button>
+      <button type="button" className="tool-rail-btn" ref={closeButtonRef} aria-label="Close agent handoff" onClick={onClose}><X size={17} /></button>
     </div>
     <div className="handoff-content">
       <p>Paste these instructions into your agent conversation. Your agent can read the saved diagram, review the notes, and preview its edits.</p>
@@ -41,8 +60,10 @@ export function HandoffPanel({ document, context, hasUnsavedEdits, onClose }: Pr
         {copied ? <Check size={16} /> : <ClipboardCopy size={16} />}{copied ? 'Copied — paste into your agent' : 'Copy agent instructions'}
       </button>
       {copyError && <p role="alert">{copyError}</p>}
-      <textarea className="handoff-instructions" aria-label="Agent instructions" value={text} readOnly spellCheck={false} />
-      <p className="field-hint">Copying keeps the handoff under your control. Your agent runs when you send it the instructions.</p>
+      <textarea ref={instructionsRef} className="handoff-instructions" aria-label="Agent instructions" value={text} readOnly spellCheck={false} />
+      <p className="field-hint" role="status" aria-live="polite" aria-atomic="true">
+        {copied ? `Revision ${document.revision} copied. Your agent runs when you send it the instructions.` : 'Copying keeps the handoff under your control. Your agent runs when you send it the instructions.'}
+      </p>
     </div>
   </aside>;
 }

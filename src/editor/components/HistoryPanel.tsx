@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { X, RotateCcw, Clock, User, Loader2, AlertCircle } from 'lucide-react';
 import { api } from '../api/client.js';
+import { usePanelFocus } from '../hooks/usePanelFocus.js';
 import type { RevisionMeta } from '../types.js';
 
 interface HistoryPanelProps {
@@ -99,13 +100,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [selectedRev, setSelectedRev] = useState<number | null>(null);
   const loadGenerationRef = useRef(0);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    const opener = document.activeElement as HTMLElement | null;
-    closeButtonRef.current?.focus();
-    return () => { if (opener?.isConnected) opener.focus(); };
-  }, []);
+  const { panelRef, closeButtonRef } = usePanelFocus(onClose);
 
   const loadHistory = useCallback(() => {
     const generation = ++loadGenerationRef.current;
@@ -135,7 +130,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
   }, [loadHistory, currentRevision]);
 
   return (
-    <aside className="history-panel" aria-label="Revision history panel">
+    <aside ref={panelRef} className="history-panel" aria-label="Revision history panel">
       <div className="inspector-header">
         <div className="inspector-title">
           <Clock size={14} />

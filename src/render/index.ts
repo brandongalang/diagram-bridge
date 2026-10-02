@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import type { Browser } from 'playwright';
 import { createHash, randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, renameSync, unlinkSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -31,11 +31,13 @@ export async function snapshot(options: SnapshotOptions) {
   mkdirSync(dirname(destination), { recursive: true });
   const temporary = `${destination}.${randomUUID()}.tmp`;
   const server = await startServer({ root: options.root, ephemeral: true, port: 0 });
-  let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
+  let browser: Browser | undefined;
   const timeoutMs = options.timeoutMs ?? 30_000;
   let timedOut = false;
   const timer = setTimeout(() => { timedOut = true; void browser?.close(); }, timeoutMs);
   try {
+    // Most CLI calls only read or edit JSON; load the browser runtime for PNGs.
+    const { chromium } = await import('playwright');
     browser = await chromium.launch({ headless: true, timeout: Math.min(timeoutMs, 15_000) });
     const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
     page.setDefaultTimeout(timeoutMs);

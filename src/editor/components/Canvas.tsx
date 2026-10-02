@@ -22,7 +22,8 @@ import type {
   SelectedElement
 } from '../types.js';
 import '../canvas.css';
-import { routeEdge } from '../routing/index.js';
+import { CanvasRouteCache, projectNodes } from '../canvas/projection.js';
+import type { RouteResult } from '../routing/index.js';
 
 interface CanvasProps {
   document: DiagramDocument;
@@ -34,48 +35,6 @@ interface CanvasProps {
   readOnly?: boolean;
   fitViewTrigger?: number;
   onAddFirstNode?: () => void;
-}
-
-function buildRfNodes(
-  doc: DiagramDocument,
-  selectedElement: SelectedElement,
-  readOnly: boolean,
-  isExport: boolean
-): Node[] {
-  // In React Flow, group parent nodes must appear before child nodes
-  const groupNodes = doc.nodes.filter((n) => n.kind === 'group');
-  const leafNodes = doc.nodes.filter((n) => n.kind !== 'group');
-  const sorted = [...groupNodes, ...leafNodes];
-
-  return sorted.map((n) => {
-    const isSelected = selectedElement?.type === 'node' && selectedElement.id === n.id;
-    const notes = doc.notes.filter(
-      (nt) => nt.anchor.type === 'node' && nt.anchor.id === n.id
-    );
-
-    return {
-      id: n.id,
-      type: n.kind,
-      position: { x: n.layout.x, y: n.layout.y },
-      parentId: n.parentId,
-      style: {
-        width: n.layout.width,
-        height: n.layout.height,
-        zIndex: n.kind === 'group' ? -1 : 1
-      },
-      selected: isSelected,
-      draggable: !readOnly && !isExport,
-      selectable: !isExport,
-      data: {
-        id: n.id,
-        label: n.label,
-        kind: n.kind,
-        parentId: n.parentId,
-        noteCount: notes.length,
-        isExport
-      }
-    };
-  });
 }
 
 const CanvasInner: React.FC<CanvasProps> = ({
@@ -94,16 +53,17 @@ const CanvasInner: React.FC<CanvasProps> = ({
   const readyTimeoutRef = useRef<any>(null);
   const isDraggingRef = useRef(false);
   const lastDocIdRef = useRef<string | null>(null);
+  const [routeCache] = useState(() => new CanvasRouteCache());
 
   // Local nodes state for smooth 60fps dragging and selection changes
   const [nodes, setNodes] = useState<Node[]>(() =>
-    buildRfNodes(doc, selectedElement, readOnly, isExport)
+    projectNodes(doc, selectedElement, readOnly, isExport)
   );
 
   // Sync nodes from doc when doc changes and user is not actively dragging
   useEffect(() => {
     if (isDraggingRef.current) return;
-    setNodes(buildRfNodes(doc, selectedElement, readOnly, isExport));
+    setNodes(projectNodes(doc, selectedElement, readOnly, isExport));
   }, [doc, selectedElement, readOnly, isExport]);
 
   // Viewport handling: On document switch, fit intentionally.
@@ -124,43 +84,25 @@ const CanvasInner: React.FC<CanvasProps> = ({
     }
   }, [fitViewTrigger, fitView]);
 
-  // Use live positions so connectors follow the nodes throughout a drag.
-  const nodeBoundsMap = useMemo(() => {
-    const byId = new Map(nodes.map(n => [n.id, n]));
-    return new Map(nodes.map(n => {
-      const parent = n.parentId ? byId.get(n.parentId) : undefined;
-      return [n.id, {
-        id: n.id,
-        x: n.position.x + (parent?.position.x ?? 0),
-        y: n.position.y + (parent?.position.y ?? 0),
-        width: Number(n.style?.width ?? 220),
-        height: Number(n.style?.height ?? 88)
-      }];
-    }));
-  }, [nodes]);
-
   const rfEdges: Edge[] = useMemo(() => {
-    const obstacles = nodes.filter(n => n.type !== 'group').map(n => nodeBoundsMap.get(n.id)!);
-    return doc.edges.flatMap(e => {
-      const source = nodeBoundsMap.get(e.source)!;
-      const target = nodeBoundsMap.get(e.target)!;
-      if (!source || !target) return [];
-      const route = routeEdge({ source, target, obstacles, label: e.label });
-      return {
-        id: e.id, source: e.source, target: e.target,
-        sourceHandle: route.sourceSide, targetHandle: route.targetSide,
-        type: 'custom', label: e.label,
-        selected: selectedElement?.type === 'edge' && selectedElement.id === e.id,
-        selectable: !isExport,
-        data: { route, isExport, label: e.label,
-          onSelectEdge: (id: string) => {
-            if (!isExport) onSelectElement({ type: 'edge', id });
-          }
-        }
-      };
+    const projected = routeCache.project({
+      documentId: doc.documentId,
+      liveNodes: nodes,
+      edges: doc.edges,
+      selectedElement,
+      isExport
     });
-  }, [doc.edges, nodes, nodeBoundsMap, selectedElement, isExport, onSelectElement]);
-  const blockedRoutes = rfEdges.filter(e => (e.data?.route as ReturnType<typeof routeEdge>).unroutable);
+    return projected.edges.map((e) => ({
+      ...e,
+      data: {
+        ...e.data,
+        onSelectEdge: (id: string) => {
+          if (!isExport) onSelectElement({ type: 'edge', id });
+        }
+      }
+    }));
+  }, [doc.documentId, doc.edges, nodes, selectedElement, isExport, onSelectElement, routeCache]);
+  const blockedRoutes = rfEdges.filter((e) => (e.data?.route as RouteResult).unroutable);
 
   // onNodesChange handler for local drag state and selection; ignores built-in delete
   const handleNodesChange: OnNodesChange = useCallback(
@@ -290,7 +232,7 @@ const CanvasInner: React.FC<CanvasProps> = ({
       });
 
       for (const edge of rfEdges) {
-        const route = edge.data?.route as ReturnType<typeof routeEdge>;
+        const route = edge.data?.route as RouteResult;
         for (const point of route.points) boxes.push({ ...point, width: 0, height: 0 });
         if (route.label) boxes.push(route.label);
       }

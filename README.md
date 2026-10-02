@@ -17,10 +17,10 @@ Requires **Node.js 24 or later** and npm. Check with `node --version`. Download 
 
 ### Prebuilt download
 
-Download **`diagram-bridge-0.1.0.tgz`** from the [latest release](https://github.com/brandongalang/diagram-bridge/releases/latest). In the directory containing the downloaded file:
+Download **`diagram-bridge-0.1.1.tgz`** from the [latest release](https://github.com/brandongalang/diagram-bridge/releases/latest). In the directory containing the downloaded file:
 
 ```sh
-npm install -g ./diagram-bridge-0.1.0.tgz
+npm install -g ./diagram-bridge-0.1.1.tgz
 diagram --help
 ```
 
@@ -106,7 +106,7 @@ For PNG snapshots, install the matching Chromium renderer once. From a source ch
 npm run browser:install
 ```
 
-For the prebuilt 0.1.0 package:
+For the prebuilt 0.1.1 package:
 
 ```sh
 npx --yes playwright@1.63.0 install chromium

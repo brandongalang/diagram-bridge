@@ -78,3 +78,28 @@ test('workspace isolation, no implicit server, and finite argument failures', ()
     assert.equal(run(roots[0], ['apply', 'unknown'], 2).error.code, 'MISSING_ARGUMENT');
   } finally { roots.forEach(root => rmSync(root, { recursive: true, force: true })); }
 });
+
+test('planning commands run without loading the browser renderer', () => {
+  const root = mkdtempSync(join(tmpdir(), 'diagram-cli-lightweight-'));
+  try {
+    const hook = join(root, 'no-browser.mjs');
+    writeFileSync(hook, `
+      import { registerHooks } from 'node:module';
+      registerHooks({ resolve(specifier, context, next) {
+        if (specifier === 'playwright' || specifier.startsWith('playwright/')) {
+          throw new Error('Planning commands must not load Playwright');
+        }
+        return next(specifier, context);
+      } });
+    `);
+    run(root, ['init', root]);
+    const id = run(root, ['create', 'Lightweight planning']).document.documentId;
+    for (const args of [['--help'], ['schema', 'operations'], ['read', id], ['pull', id, '--brief']]) {
+      const child = spawnSync(process.execPath, ['--import', hook, '--import', 'tsx', cli, ...args, '--workspace', root], {
+        encoding: 'utf8', timeout: 15000
+      });
+      assert.equal(child.status, 0, child.stderr);
+      assert.ok(child.stdout.length > 0);
+    }
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});

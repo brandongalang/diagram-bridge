@@ -92,7 +92,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     } else if (e.key === 'Escape') {
       cancelledTitle.current = true;
       setTitleValue(originalTitle.current);
-      onTitleChange(originalTitle.current);
+      if (originalTitle.current !== title) onTitleChange(originalTitle.current);
       setIsEditingTitle(false);
       e.currentTarget.blur();
     }

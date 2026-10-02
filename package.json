@@ -1,6 +1,6 @@
 {
   "name": "diagram-bridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local, revisioned diagrams for people and agents",
   "type": "module",
   "bin": {
